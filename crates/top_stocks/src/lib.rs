@@ -1,9 +1,23 @@
 #[macro_use]
 extern crate helix;
 extern crate csv;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
 
 use std::collections::HashMap;
 use std::fs::File;
+
+#[derive(Debug,Serialize,Deserialize)]
+struct Record {
+    symbol: String,
+    date: String,
+    close: Option<f64>,
+    volume: Option<f64>,
+    open: Option<f64>,
+    high: Option<f64>,
+    low: Option<f64>,
+}
 
 ruby! {
     class TopStocks {
@@ -12,37 +26,29 @@ ruby! {
         }
 
         def import(path: String) -> String {
-            println!("{}", path);
-
-            let mut data: HashMap<String, Vec<HashMap<String,String> > > = HashMap::new();
+            let mut data: HashMap<String, Vec<Record>> = HashMap::new();
 
             let file = File::open(path).unwrap();
 
             let mut rdr = csv::Reader::from_reader(file);
-            for result in rdr.records() {
-                let record = result.unwrap();
-                let mut row = HashMap::new();
-                row.insert(String::from("symbol"), String::from(&record[0]));
-                row.insert(String::from("date"), String::from(&record[1]));
-                row.insert(String::from("close"), String::from(&record[2]));
-                row.insert(String::from("volume"), String::from(&record[3]));
-                row.insert(String::from("open"), String::from(&record[4]));
-                row.insert(String::from("high"), String::from(&record[5]));
-                row.insert(String::from("low"), String::from(&record[6]));
+            for result in rdr.deserialize() {
 
-                let mut symbol_data = data.entry(String::from(&record[0])).or_insert(Vec::new());
-                symbol_data.push(row);
+                let record: Record = result.unwrap();
+
+                let mut symbol_data = data.entry(record.symbol.clone()).or_insert(Vec::new());
+                symbol_data.push(record);
             }
 
             for arr in data.values_mut() {
                 arr.sort_by(|a,b|
-                    b.get("close").unwrap().parse::<f32>().unwrap().partial_cmp(&a.get("close").unwrap().parse::<f32>().unwrap()).unwrap()
+                    b.close.partial_cmp(&a.close).unwrap()
                 );
+                arr.truncate(10);
             }
 
-            println!("{}", data.len());
+            let json = serde_json::to_string(&data).unwrap();
 
-            return String::new();
+            return json;
         }
 
     }
