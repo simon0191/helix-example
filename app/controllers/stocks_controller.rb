@@ -22,4 +22,13 @@ class StocksController < ApplicationController
     ellapsed_time = ((t1 - t0) * 1000.0).round(4)
     render json: {time: ellapsed_time, data: data.keys.reduce({}){ |memo, k| memo[k] = data[k][0...10]; memo }}
   end
+
+  def rust_import
+    file = params[:file]
+    t0 = Time.now
+    result = TopStocks.import(file.path)
+    t1 = Time.now
+    ellapsed_time = ((t1 - t0) * 1000.0).round(4)
+    render json: {time: ellapsed_time, data: JSON.parse(result) }
+  end
 end

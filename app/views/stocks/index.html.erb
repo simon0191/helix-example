@@ -1,5 +1,11 @@
 <h1>Hello</h1>
 <%= form_tag import_stocks_path, multipart: true do %>
   <%= file_field_tag :file %>
-  <%= submit_tag  "Import CSV" %>
+  <%= submit_tag  "Import CSV (Slow)" %>
+<% end %>
+<hr>
+<br>
+<%= form_tag rust_import_stocks_path, multipart: true do %>
+  <%= file_field_tag :file %>
+  <%= submit_tag  "Import CSV (Fast)" %>
 <% end %>

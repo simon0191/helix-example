@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   resources :stocks, only: [:index] do
     collection do
       post :import
+      post :rust_import
     end
   end
 end
