@@ -22,3 +22,6 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+
+http://www.nasdaq.com/symbol/ibm/historical
+https://www.kaggle.com/dgawlik/nyse
